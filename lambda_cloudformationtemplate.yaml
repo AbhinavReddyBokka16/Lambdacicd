@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to create a Lambda function within Free Tier.
+Resources:
+ LambdaExecutionRole:
+   Type: AWS::IAM::Role
+   Properties:
+     AssumeRolePolicyDocument:
+       Version: '2012-10-17'
+       Statement:
+         - Effect: Allow
+           Principal:
+             Service: lambda.amazonaws.com
+           Action: sts:AssumeRole
+     Policies:
+       - PolicyName: LambdaS3AccessPolicy
+         PolicyDocument:
+           Version: '2012-10-17'
+           Statement:
+             - Effect: Allow
+               Action: "s3:*"
+               Resource: "*"
+ LambdaFunction:
+   Type: AWS::Lambda::Function
+   Properties:
+     FunctionName: FreeTierLambdaFunction
+     Runtime: python3.9
+     Handler: index.lambda_handler
+     Role: !GetAtt LambdaExecutionRole.Arn
+     Code:
+       ZipFile: |
+         def lambda_handler(event, context):
+             return {
+                 'statusCode': 200,
+                 'body': 'Hello from Lambda with S3 access!'
+             }
+     Timeout: 3 # Keep timeout low to stay within Free Tier limits
